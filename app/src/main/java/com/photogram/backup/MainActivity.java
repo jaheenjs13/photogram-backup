@@ -61,7 +61,7 @@ public class MainActivity extends AppCompatActivity {
     private SharedPreferences prefs;
     private DatabaseHelper dbHelper;
     private TextView tvTotalStats, tvSyncStatus, tvCurrentFile;
-    private TextView tvStatsTotal, tvStatsLastSync, tvStatsNextSync;
+    private TextView tvStatsTotal, tvStatsLastSync, tvStatsNextSync, tvStatsLimit;
     private Button btnSelectAll, btnDeselectAll;
     private ProgressBar pbSync;
     private static final int PERM_CODE = 101;
@@ -96,6 +96,7 @@ public class MainActivity extends AppCompatActivity {
         tvStatsTotal = statsCard.findViewById(R.id.tvStatsTotal);
         tvStatsLastSync = statsCard.findViewById(R.id.tvStatsLastSync);
         tvStatsNextSync = statsCard.findViewById(R.id.tvStatsNextSync);
+        tvStatsLimit = statsCard.findViewById(R.id.tvStatsLimit);
         
         // Bulk action buttons
         btnSelectAll = findViewById(R.id.btnSelectAll);
@@ -132,6 +133,7 @@ public class MainActivity extends AppCompatActivity {
 
         setupAdapter();
         refreshDashboard();
+        fetchBackupLimitFromFirebase();
         allFolders.addAll(dbHelper.getSavedFolders());
         filterFolders("");
         handlePermissions();
@@ -354,6 +356,54 @@ public class MainActivity extends AppCompatActivity {
             }
         };
         listView.setAdapter(adapter);
+    }
+    
+    private void fetchBackupLimitFromFirebase() {
+        String uid = FirebaseAuth.getInstance().getUid();
+        if (uid == null) return;
+        
+        com.google.firebase.database.DatabaseReference ref = com.google.firebase.database.FirebaseDatabase
+            .getInstance("https://photogram-dd154-default-rtdb.asia-southeast1.firebasedatabase.app/")
+            .getReference("users")
+            .child(uid);
+        
+        ref.addValueEventListener(new com.google.firebase.database.ValueEventListener() {
+            @Override
+            public void onDataChange(@androidx.annotation.NonNull com.google.firebase.database.DataSnapshot snapshot) {
+                if (!snapshot.exists()) return;
+                
+                String status = snapshot.child("status").getValue(String.class);
+                
+                if ("limited".equals(status)) {
+                    Integer dailyLimit = snapshot.child("daily_limit").getValue(Integer.class);
+                    Integer currentUsage = snapshot.child("usage_count").getValue(Integer.class);
+                    
+                    if (dailyLimit != null && currentUsage != null) {
+                        String limitText = currentUsage + "/" + dailyLimit;
+                        tvStatsLimit.setText(limitText);
+                        
+                        // Change color based on usage
+                        float usagePercent = (float) currentUsage / dailyLimit;
+                        if (usagePercent >= 0.9f) {
+                            tvStatsLimit.setTextColor(getResources().getColor(R.color.status_error, null));
+                        } else if (usagePercent >= 0.7f) {
+                            tvStatsLimit.setTextColor(getResources().getColor(R.color.status_warning, null));
+                        } else {
+                            tvStatsLimit.setTextColor(getResources().getColor(R.color.status_success, null));
+                        }
+                    }
+                } else {
+                    // Unlimited account
+                    tvStatsLimit.setText("∞");
+                    tvStatsLimit.setTextColor(getResources().getColor(R.color.status_success, null));
+                }
+            }
+            
+            @Override
+            public void onCancelled(@androidx.annotation.NonNull com.google.firebase.database.DatabaseError error) {
+                tvStatsLimit.setText("--");
+            }
+        });
     }
 
     @Override
