@@ -86,10 +86,12 @@ public class BackupWorker extends Worker {
         try {
             Map<String, String> reg = helper.getTopicRegistry();
             if (dbHelper.getTotalBackupCount() == 0 && reg.containsKey("CLOUD_HISTORY_ID")) {
+                dbHelper.addLog("INFO", "Importing history from cloud...");
                 dbHelper.importHistoryFromJson(helper.downloadHistoryFile(reg.get("CLOUD_HISTORY_ID")));
             }
 
-            int count = performDeltaSync(prefs.getLong("last_sync_timestamp", 0) / 1000, helper, reg, uid);
+            long since = isManual ? 0 : (prefs.getLong("last_sync_timestamp", 0) / 1000);
+            int count = performDeltaSync(since, helper, reg, uid);
             dbHelper.addLog("INFO", "Sync Finished: " + count + " photos uploaded");
 
             if (count > 0 || !reg.containsKey("CLOUD_HISTORY_ID")) {
@@ -135,6 +137,7 @@ public class BackupWorker extends Worker {
         int count = 0;
         ContentResolver resolver = ctx.getContentResolver();
         dbHelper.addLog("DEBUG", "Scanning MediaStore since: " + since);
+        int matchedFolders = 0;
         try (Cursor cursor = resolver.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, new String[]{MediaStore.Images.Media.DATA, MediaStore.Images.Media.DATE_MODIFIED}, MediaStore.Images.Media.DATE_MODIFIED + " > ?", new String[]{String.valueOf(since)}, MediaStore.Images.Media.DATE_MODIFIED + " ASC")) {
             if (cursor != null && cursor.moveToFirst()) {
                 int total = cursor.getCount(), idx = 0;
@@ -146,7 +149,10 @@ public class BackupWorker extends Worker {
                     String path = cursor.getString(0);
                     long mod = cursor.getLong(1);
                     File f = new File(path);
-                    if (f.getParentFile() != null && prefs.getBoolean(f.getParentFile().getAbsolutePath(), false)) {
+                    String folderPath = f.getParentFile() != null ? f.getParentFile().getAbsolutePath() : "";
+                    
+                    if (!folderPath.isEmpty() && prefs.getBoolean(folderPath, false)) {
+                        matchedFolders++;
                         if (!dbHelper.isFileUploaded(path, mod)) {
                             setProgressAsync(new Data.Builder().putString("current_file", f.getName()).putInt("progress_percent", (int)((idx/(float)total)*100)).build());
                             String tid = getTid(f.getParentFile(), helper, reg);
@@ -168,6 +174,7 @@ public class BackupWorker extends Worker {
                 } while (cursor.moveToNext());
             }
         }
+        dbHelper.addLog("DEBUG", "Scan result: " + matchedFolders + " photos in selected folders, " + count + " new.");
         return count;
     }
 
