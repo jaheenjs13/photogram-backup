@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="brand_vibrant">#00A3FF</color>
+    <color name="brand_deep">#0057FF</color>
+    <color name="brand_dark">#101828</color>
+    
+    <color name="surface_bg">#F9FAFB</color>
+    <color name="surface_card">#FFFFFF</color>
+    <color name="card_border">#EAECF0</color>
+    
+    <color name="text_title">#101828</color>
+    <color name="text_body">#475467</color>
+    <color name="text_white">#FFFFFF</color>
+</resources>
