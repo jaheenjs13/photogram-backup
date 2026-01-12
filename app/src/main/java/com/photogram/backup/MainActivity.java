@@ -91,12 +91,11 @@ public class MainActivity extends AppCompatActivity {
         pbSync = findViewById(R.id.pbSync);
         EditText etSearch = findViewById(R.id.etSearch);
         
-        // Statistics card views
-        View statsCard = findViewById(R.id.statsCard);
-        tvStatsTotal = statsCard.findViewById(R.id.tvStatsTotal);
-        tvStatsLastSync = statsCard.findViewById(R.id.tvStatsLastSync);
-        tvStatsNextSync = statsCard.findViewById(R.id.tvStatsNextSync);
-        tvStatsLimit = statsCard.findViewById(R.id.tvStatsLimit);
+        // Statistics card views - find directly from activity, not from include
+        tvStatsTotal = findViewById(R.id.tvStatsTotal);
+        tvStatsLastSync = findViewById(R.id.tvStatsLastSync);
+        tvStatsNextSync = findViewById(R.id.tvStatsNextSync);
+        tvStatsLimit = findViewById(R.id.tvStatsLimit);
         
         // Bulk action buttons
         btnSelectAll = findViewById(R.id.btnSelectAll);
