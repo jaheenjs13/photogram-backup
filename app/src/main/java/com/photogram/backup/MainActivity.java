@@ -350,40 +350,7 @@ public class MainActivity extends AppCompatActivity {
     }
     
     private void fetchBackupLimitFromFirebase() {
-        String uid = FirebaseAuth.getInstance().getUid();
-        if (uid == null) return;
-        
-        com.google.firebase.database.DatabaseReference ref = com.google.firebase.database.FirebaseDatabase
-            .getInstance("https://photogram-dd154-default-rtdb.asia-southeast1.firebasedatabase.app/")
-            .getReference("users")
-            .child(uid);
-        
-        ref.addValueEventListener(new com.google.firebase.database.ValueEventListener() {
-            @Override
-            public void onDataChange(@androidx.annotation.NonNull com.google.firebase.database.DataSnapshot snapshot) {
-                if (!snapshot.exists()) return;
-                
-                String status = snapshot.child("status").getValue(String.class);
-                
-                if ("limited".equals(status)) {
-                    Integer dailyLimit = snapshot.child("daily_limit").getValue(Integer.class);
-                    Integer currentUsage = snapshot.child("usage_count").getValue(Integer.class);
-                    
-                    if (dailyLimit != null && currentUsage != null) {
-                        // Logic removed as tvStatsLimit is no longer present
-                    }
-                } else {
-                    // Unlimited account - Logic removed as tvStatsLimit is no longer present
-                // All logic related to tvStatsLimit has been removed.
-                // This method now effectively does nothing with the snapshot data
-                // if its only purpose was to update the removed UI element.
-            }
-            
-            @Override
-            public void onCancelled(@androidx.annotation.NonNull com.google.firebase.database.DatabaseError error) {
-                // Logic removed as tvStatsLimit is no longer present
-            }
-        });
+        // Logic removed as tvStatsLimit is no longer present in home page
     }
 
     @Override
