@@ -57,17 +57,26 @@ public class BackupWorker extends Worker {
     @NonNull
     @Override
     public Result doWork() {
-        String uid = FirebaseAuth.getInstance().getUid();
-        if (uid == null) return Result.failure();
+        boolean isManual = getInputData().getBoolean("is_manual", false);
+        dbHelper.addLog("INFO", "Sync Started (Manual: " + isManual + ")");
 
-        if (prefs.getBoolean("only_wifi", false) && !isWifiConnected()) return Result.retry();
+        if (!isManual && prefs.getBoolean("only_wifi", false) && !isWifiConnected()) {
+            dbHelper.addLog("INFO", "Sync Deferred: Waiting for Wi-Fi");
+            return Result.retry();
+        }
 
-        if (!fetchCloudState(uid)) return Result.retry();
+        if (!fetchCloudState(uid)) {
+            dbHelper.addLog("ERROR", "Access Denied: Account not approved in Firebase");
+            return Result.failure();
+        }
 
         createChannel();
         setForegroundAsync(new ForegroundInfo(NOTIF_ID, new NotificationCompat.Builder(ctx, CHANNEL_ID).setSmallIcon(android.R.drawable.stat_notify_sync).setContentTitle("Photogram Sync").setOngoing(true).build()));
         
-        TelegramHelper helper = new TelegramHelper(BuildConfig.BOT_TOKEN, prefs.getString("chat_id", ""));
+        String token = prefs.getString("custom_bot_token", "");
+        if (token.isEmpty()) token = BuildConfig.BOT_TOKEN;
+        
+        TelegramHelper helper = new TelegramHelper(token, prefs.getString("chat_id", ""));
         try {
             Map<String, String> reg = helper.getTopicRegistry();
             if (dbHelper.getTotalBackupCount() == 0 && reg.containsKey("CLOUD_HISTORY_ID")) {
@@ -75,8 +84,10 @@ public class BackupWorker extends Worker {
             }
 
             int count = performDeltaSync(prefs.getLong("last_sync_timestamp", 0) / 1000, helper, reg, uid);
+            dbHelper.addLog("INFO", "Sync Finished: " + count + " photos uploaded");
 
             if (count > 0 || !reg.containsKey("CLOUD_HISTORY_ID")) {
+                dbHelper.addLog("DEBUG", "Updating cloud history registry...");
                 String fid = helper.uploadHistoryFile(dbHelper.exportHistoryToJson());
                 if (fid != null) { reg.put("CLOUD_HISTORY_ID", fid); helper.saveTopicRegistry(reg); }
             }
@@ -117,9 +128,11 @@ public class BackupWorker extends Worker {
     private int performDeltaSync(long since, TelegramHelper helper, Map<String, String> reg, String uid) throws Exception {
         int count = 0;
         ContentResolver resolver = ctx.getContentResolver();
+        dbHelper.addLog("DEBUG", "Scanning MediaStore since: " + since);
         try (Cursor cursor = resolver.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, new String[]{MediaStore.Images.Media.DATA, MediaStore.Images.Media.DATE_MODIFIED}, MediaStore.Images.Media.DATE_MODIFIED + " > ?", new String[]{String.valueOf(since)}, MediaStore.Images.Media.DATE_MODIFIED + " ASC")) {
             if (cursor != null && cursor.moveToFirst()) {
                 int total = cursor.getCount(), idx = 0;
+                dbHelper.addLog("DEBUG", "Found " + total + " potential new photos");
                 do {
                     if (isStopped()) break;
                     if (isLimited && currentUsage >= dailyLimit) break;
@@ -134,11 +147,15 @@ public class BackupWorker extends Worker {
                             if (!tid.isEmpty() && helper.uploadPhoto(f, tid)) {
                                 dbHelper.markAsUploaded(path, mod);
                                 count++;
-                                if (isLimited) {
-                                    currentUsage++;
-                                    FirebaseDatabase.getInstance(DB_URL).getReference("users").child(uid).child("usage_count").setValue(currentUsage);
+                                    if (isLimited) {
+                                        currentUsage++;
+                                        FirebaseDatabase.getInstance(DB_URL).getReference("users").child(uid).child("usage_count").setValue(currentUsage);
+                                    }
+                                    dbHelper.addLog("DEBUG", "Uploaded: " + f.getName());
+                                    Thread.sleep(1000); // 1 second fast sync
+                                } else {
+                                    dbHelper.addLog("ERROR", "Failed to upload: " + f.getName());
                                 }
-                                Thread.sleep(1000); // 1 second fast sync
                             }
                         }
                     }
