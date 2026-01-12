@@ -57,6 +57,12 @@ public class BackupWorker extends Worker {
     @NonNull
     @Override
     public Result doWork() {
+        String uid = FirebaseAuth.getInstance().getUid();
+        if (uid == null) {
+            dbHelper.addLog("ERROR", "Sync Failed: User not logged in");
+            return Result.failure();
+        }
+
         boolean isManual = getInputData().getBoolean("is_manual", false);
         dbHelper.addLog("INFO", "Sync Started (Manual: " + isManual + ")");
 
