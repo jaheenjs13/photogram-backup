@@ -60,8 +60,7 @@ public class MainActivity extends AppCompatActivity {
     private BaseAdapter adapter;
     private SharedPreferences prefs;
     private DatabaseHelper dbHelper;
-    private TextView tvTotalStats, tvSyncStatus, tvCurrentFile;
-    private TextView tvStatsTotal, tvStatsLastSync, tvStatsNextSync, tvStatsLimit;
+    private TextView tvSyncStatus, tvCurrentFile;
     private Button btnSelectAll, btnDeselectAll;
     private ProgressBar pbSync;
     private static final int PERM_CODE = 101;
@@ -85,17 +84,11 @@ public class MainActivity extends AppCompatActivity {
         
         listView = findViewById(R.id.folderListView);
         swipeRefresh = findViewById(R.id.swipeRefresh);
-        tvTotalStats = findViewById(R.id.tvTotalStats);
         tvSyncStatus = findViewById(R.id.tvSyncStatus);
         tvCurrentFile = findViewById(R.id.tvCurrentFile);
         pbSync = findViewById(R.id.pbSync);
         EditText etSearch = findViewById(R.id.etSearch);
         
-        // Statistics card views - find directly from activity, not from include
-        tvStatsTotal = findViewById(R.id.tvStatsTotal);
-        tvStatsLastSync = findViewById(R.id.tvStatsLastSync);
-        tvStatsNextSync = findViewById(R.id.tvStatsNextSync);
-        tvStatsLimit = findViewById(R.id.tvStatsLimit);
         
         // Bulk action buttons
         btnSelectAll = findViewById(R.id.btnSelectAll);
@@ -165,28 +158,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void refreshDashboard() {
-        int totalCount = dbHelper.getTotalBackupCount();
-        tvTotalStats.setText(totalCount + " Items Saved");
-        
-        // Update statistics card
-        tvStatsTotal.setText(String.valueOf(totalCount));
-        
         long last = prefs.getLong("last_sync_timestamp", 0);
         if (last > 0) {
             tvSyncStatus.setText("Last Sync: " + new SimpleDateFormat("HH:mm", Locale.getDefault()).format(new Date(last)));
-            tvStatsLastSync.setText(getRelativeTime(last));
         } else {
             tvSyncStatus.setText("Cloud Ready");
-            tvStatsLastSync.setText("Never");
-        }
-        
-        // Calculate next sync time
-        int syncInterval = prefs.getInt("sync_interval", 60);
-        if (last > 0) {
-            long nextSync = last + (syncInterval * 60 * 1000);
-            tvStatsNextSync.setText(getRelativeTime(nextSync));
-        } else {
-            tvStatsNextSync.setText("--");
         }
     }
     
@@ -394,29 +370,18 @@ public class MainActivity extends AppCompatActivity {
                     Integer currentUsage = snapshot.child("usage_count").getValue(Integer.class);
                     
                     if (dailyLimit != null && currentUsage != null) {
-                        String limitText = currentUsage + "/" + dailyLimit;
-                        tvStatsLimit.setText(limitText);
-                        
-                        // Change color based on usage
-                        float usagePercent = (float) currentUsage / dailyLimit;
-                        if (usagePercent >= 0.9f) {
-                            tvStatsLimit.setTextColor(getResources().getColor(R.color.status_error, null));
-                        } else if (usagePercent >= 0.7f) {
-                            tvStatsLimit.setTextColor(getResources().getColor(R.color.status_warning, null));
-                        } else {
-                            tvStatsLimit.setTextColor(getResources().getColor(R.color.status_success, null));
-                        }
+                        // Logic removed as tvStatsLimit is no longer present
                     }
                 } else {
-                    // Unlimited account
-                    tvStatsLimit.setText("∞");
-                    tvStatsLimit.setTextColor(getResources().getColor(R.color.status_success, null));
-                }
+                    // Unlimited account - Logic removed as tvStatsLimit is no longer present
+                // All logic related to tvStatsLimit has been removed.
+                // This method now effectively does nothing with the snapshot data
+                // if its only purpose was to update the removed UI element.
             }
             
             @Override
             public void onCancelled(@androidx.annotation.NonNull com.google.firebase.database.DatabaseError error) {
-                tvStatsLimit.setText("--");
+                // Logic removed as tvStatsLimit is no longer present
             }
         });
     }
