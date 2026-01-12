@@ -44,6 +44,7 @@
     <color name="shadow_soft">#0A000000</color>
     <color name="shadow_medium">#1A000000</color>
     <color name="overlay_dark">#400F172A</color>
+    <color name="overlay_light">#40FFFFFF</color>
     
     <!-- Interactive States -->
     <color name="interactive_hover">#F8FAFC</color>
