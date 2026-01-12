@@ -4,21 +4,23 @@
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:background="@drawable/card_bg"
-    android:padding="20dp"
-    android:layout_margin="20dp"
-    android:elevation="2dp">
+    android:padding="24dp"
+    android:layout_marginLeft="20dp"
+    android:layout_marginRight="20dp"
+    android:layout_marginTop="20dp"
+    android:layout_marginBottom="12dp"
+    android:elevation="6dp">
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Backup Statistics"
         android:textColor="@color/text_primary"
-        android:textSize="15sp"
+        android:textSize="16sp"
         android:textStyle="bold"
-        android:letterSpacing="0.01"
-        android:layout_marginBottom="16dp" />
+        android:letterSpacing="-0.01"
+        android:layout_marginBottom="20dp" />
 
-    <!-- Stats Grid - 2x2 layout -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -29,15 +31,14 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginBottom="16dp">
+            android:layout_marginBottom="20dp">
 
             <!-- Total Photos -->
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:orientation="vertical"
-                android:paddingRight="8dp">
+                android:orientation="vertical">
 
                 <TextView
                     android:id="@+id/tvStatsTotal"
@@ -45,16 +46,19 @@
                     android:layout_height="wrap_content"
                     android:text="0"
                     android:textColor="@color/brand_primary"
-                    android:textSize="28sp"
-                    android:textStyle="bold" />
+                    android:textSize="32sp"
+                    android:textStyle="bold"
+                    android:letterSpacing="-0.02" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Total Photos"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="11sp"
-                    android:layout_marginTop="2dp" />
+                    android:textColor="@color/text_tertiary"
+                    android:textSize="12sp"
+                    android:layout_marginTop="2dp"
+                    android:textStyle="bold"
+                    android:textAllCaps="true" />
             </LinearLayout>
 
             <!-- Last Sync -->
@@ -63,7 +67,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:orientation="vertical"
-                android:paddingLeft="8dp">
+                android:paddingLeft="12dp">
 
                 <TextView
                     android:id="@+id/tvStatsLastSync"
@@ -71,25 +75,26 @@
                     android:layout_height="wrap_content"
                     android:text="Never"
                     android:textColor="@color/text_primary"
-                    android:textSize="15sp"
+                    android:textSize="16sp"
                     android:textStyle="bold" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Last Sync"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="11sp"
-                    android:layout_marginTop="2dp" />
+                    android:textColor="@color/text_tertiary"
+                    android:textSize="12sp"
+                    android:layout_marginTop="2dp"
+                    android:textStyle="bold"
+                    android:textAllCaps="true" />
             </LinearLayout>
         </LinearLayout>
 
-        <!-- Divider -->
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:background="@color/border_light"
-            android:layout_marginBottom="16dp" />
+            android:background="@color/divider"
+            android:layout_marginBottom="20dp" />
 
         <!-- Second Row -->
         <LinearLayout
@@ -102,8 +107,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:orientation="vertical"
-                android:paddingRight="8dp">
+                android:orientation="vertical">
 
                 <TextView
                     android:id="@+id/tvStatsNextSync"
@@ -111,16 +115,18 @@
                     android:layout_height="wrap_content"
                     android:text="--"
                     android:textColor="@color/text_primary"
-                    android:textSize="15sp"
+                    android:textSize="16sp"
                     android:textStyle="bold" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Next Sync"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="11sp"
-                    android:layout_marginTop="2dp" />
+                    android:textColor="@color/text_tertiary"
+                    android:textSize="12sp"
+                    android:layout_marginTop="2dp"
+                    android:textStyle="bold"
+                    android:textAllCaps="true" />
             </LinearLayout>
 
             <!-- Daily Limit -->
@@ -129,7 +135,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:orientation="vertical"
-                android:paddingLeft="8dp">
+                android:paddingLeft="12dp">
 
                 <TextView
                     android:id="@+id/tvStatsLimit"
@@ -137,16 +143,18 @@
                     android:layout_height="wrap_content"
                     android:text="∞"
                     android:textColor="@color/status_success"
-                    android:textSize="15sp"
+                    android:textSize="16sp"
                     android:textStyle="bold" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Daily Limit"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="11sp"
-                    android:layout_marginTop="2dp" />
+                    android:textColor="@color/text_tertiary"
+                    android:textSize="12sp"
+                    android:layout_marginTop="2dp"
+                    android:textStyle="bold"
+                    android:textAllCaps="true" />
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>
