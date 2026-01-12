@@ -355,7 +355,8 @@ public class BackupWorker extends Worker {
                         String tid = getTid(parentDir, helper, reg);
                         
                         if (tid != null && !tid.isEmpty()) {
-                            if (helper.uploadPhoto(f, tid)) {
+                            String error = helper.uploadPhoto(f, tid);
+                            if (error == null) {
                                 dbHelper.markAsUploaded(path, mod);
                                 count++;
                                 
@@ -374,7 +375,7 @@ public class BackupWorker extends Worker {
                                 // Delay between uploads to avoid rate limiting
                                 Thread.sleep(UPLOAD_DELAY_MS);
                             } else {
-                                dbHelper.addLog("ERROR", "Failed to upload: " + f.getName() + " (" + formatFileSize(size) + ")");
+                                dbHelper.addLog("ERROR", "Failed to upload: " + f.getName() + " - " + error);
                             }
                         } else {
                             dbHelper.addLog("ERROR", "Failed to get topic ID for folder: " + parentDir.getName());

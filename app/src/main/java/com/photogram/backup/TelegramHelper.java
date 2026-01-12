@@ -87,29 +87,64 @@ public class TelegramHelper {
         }
     }
 
-    public boolean uploadPhoto(File photo, String tid) {
-        long sizeInMb = photo.length() / (1024 * 1024);
-        boolean useDocument = sizeInMb >= 10;
+    public String uploadPhoto(File photo, String tid) {
+        String ext = getFileExtension(photo).toLowerCase();
+        // Telegram sendPhoto often fails with HEIC or files with complex metadata
+        // We force sendDocument for HEIC or files larger than 10MB
+        boolean forceDocument = ext.equals("heic") || photo.length() >= 10 * 1024 * 1024;
         
+        String error = executeUpload(photo, tid, forceDocument);
+        
+        // Automatic fallback: If sendPhoto failed, try sendDocument as it's more robust
+        if (error != null && !forceDocument) {
+            String fallbackError = executeUpload(photo, tid, true);
+            if (fallbackError == null) return null; // Fallback succeeded
+            return error + " (Fallback failed: " + fallbackError + ")";
+        }
+        
+        return error;
+    }
+
+    private String executeUpload(File photo, String tid, boolean asDocument) {
+        String method = asDocument ? "sendDocument" : "sendPhoto";
+        String partName = asDocument ? "document" : "photo";
+        String mimeType = getMimeType(photo);
+
         MultipartBody.Builder builder = new MultipartBody.Builder()
                 .setType(MultipartBody.FORM)
                 .addFormDataPart("chat_id", chatId)
-                .addFormDataPart("message_thread_id", tid);
-
-        String method;
-        if (useDocument) {
-            method = "sendDocument";
-            builder.addFormDataPart("document", photo.getName(), 
-                    RequestBody.create(photo, MediaType.parse("image/jpeg")));
-        } else {
-            method = "sendPhoto";
-            builder.addFormDataPart("photo", photo.getName(), 
-                    RequestBody.create(photo, MediaType.parse("image/jpeg")));
-        }
+                .addFormDataPart("message_thread_id", tid)
+                .addFormDataPart(partName, photo.getName(), 
+                        RequestBody.create(photo, MediaType.parse(mimeType)));
 
         RequestBody body = builder.build();
         try (Response res = client.newCall(new Request.Builder().url(API_URL + method).post(body).build()).execute()) {
-            return res.isSuccessful();
-        } catch (Exception e) { return false; }
+            String responseBody = res.body().string();
+            JSONObject json = new JSONObject(responseBody);
+            if (json.getBoolean("ok")) return null;
+            return json.optString("description", "Unknown error");
+        } catch (Exception e) {
+            return e.getMessage();
+        }
+    }
+
+    private String getFileExtension(File file) {
+        String name = file.getName();
+        int lastDigit = name.lastIndexOf('.');
+        if (lastDigit == -1) return "";
+        return name.substring(lastDigit + 1);
+    }
+
+    private String getMimeType(File file) {
+        String ext = getFileExtension(file).toLowerCase();
+        switch (ext) {
+            case "jpg":
+            case "jpeg": return "image/jpeg";
+            case "png": return "image/png";
+            case "gif": return "image/gif";
+            case "webp": return "image/webp";
+            case "heic": return "image/heic";
+            default: return "application/octet-stream";
+        }
     }
 }
