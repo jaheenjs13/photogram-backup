@@ -88,8 +88,27 @@ public class TelegramHelper {
     }
 
     public boolean uploadPhoto(File photo, String tid) {
-        RequestBody body = new MultipartBody.Builder().setType(MultipartBody.FORM).addFormDataPart("chat_id", chatId).addFormDataPart("message_thread_id", tid).addFormDataPart("photo", photo.getName(), RequestBody.create(photo, MediaType.parse("image/jpeg"))).build();
-        try (Response res = client.newCall(new Request.Builder().url(API_URL + "sendPhoto").post(body).build()).execute()) {
+        long sizeInMb = photo.length() / (1024 * 1024);
+        boolean useDocument = sizeInMb >= 10;
+        
+        MultipartBody.Builder builder = new MultipartBody.Builder()
+                .setType(MultipartBody.FORM)
+                .addFormDataPart("chat_id", chatId)
+                .addFormDataPart("message_thread_id", tid);
+
+        String method;
+        if (useDocument) {
+            method = "sendDocument";
+            builder.addFormDataPart("document", photo.getName(), 
+                    RequestBody.create(photo, MediaType.parse("image/jpeg")));
+        } else {
+            method = "sendPhoto";
+            builder.addFormDataPart("photo", photo.getName(), 
+                    RequestBody.create(photo, MediaType.parse("image/jpeg")));
+        }
+
+        RequestBody body = builder.build();
+        try (Response res = client.newCall(new Request.Builder().url(API_URL + method).post(body).build()).execute()) {
             return res.isSuccessful();
         } catch (Exception e) { return false; }
     }

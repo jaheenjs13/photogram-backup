@@ -374,7 +374,7 @@ public class BackupWorker extends Worker {
                                 // Delay between uploads to avoid rate limiting
                                 Thread.sleep(UPLOAD_DELAY_MS);
                             } else {
-                                dbHelper.addLog("ERROR", "Failed to upload: " + f.getName());
+                                dbHelper.addLog("ERROR", "Failed to upload: " + f.getName() + " (" + formatFileSize(size) + ")");
                             }
                         } else {
                             dbHelper.addLog("ERROR", "Failed to get topic ID for folder: " + parentDir.getName());
