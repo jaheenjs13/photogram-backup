@@ -105,6 +105,20 @@
                 android:layout_height="0dp"/>
 
             <ImageButton
+                android:id="@+id/btnHistory"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:src="@android:drawable/ic_menu_recent_history"
+                android:background="@drawable/button_white_bg"
+                android:padding="12dp"
+                android:scaleType="fitCenter"
+                android:contentDescription="View History" />
+
+            <Space 
+                android:layout_width="12dp" 
+                android:layout_height="0dp"/>
+
+            <ImageButton
                 android:id="@+id/btnSettings"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
@@ -140,12 +154,62 @@
         android:importantForAutofill="no"
         android:inputType="text" />
 
+    <!-- Statistics Card -->
+    <include 
+        android:id="@+id/statsCard"
+        layout="@layout/stats_card"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/etSearch"
+        android:layout_marginTop="16dp" />
+
+    <!-- Bulk Action Buttons -->
+    <LinearLayout
+        android:id="@+id/bulkActions"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/statsCard"
+        android:orientation="horizontal"
+        android:paddingLeft="20dp"
+        android:paddingRight="20dp"
+        android:paddingTop="12dp"
+        android:paddingBottom="8dp">
+
+        <Button
+            android:id="@+id/btnSelectAll"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_weight="1"
+            android:text="Select All"
+            android:textAllCaps="false"
+            android:background="@drawable/button_secondary_bg"
+            android:textColor="@color/text_primary"
+            android:textSize="13sp"
+            android:textStyle="bold" />
+
+        <Space
+            android:layout_width="12dp"
+            android:layout_height="0dp" />
+
+        <Button
+            android:id="@+id/btnDeselectAll"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_weight="1"
+            android:text="Deselect All"
+            android:textAllCaps="false"
+            android:background="@drawable/button_secondary_bg"
+            android:textColor="@color/text_primary"
+            android:textSize="13sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
     <!-- Swipe to Refresh -->
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/swipeRefresh"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/etSearch"
+        android:layout_below="@id/bulkActions"
         android:layout_marginTop="16dp">
 
         <!-- Folder List -->

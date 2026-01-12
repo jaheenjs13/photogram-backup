@@ -54,6 +54,16 @@
             android:ellipsize="end"
             android:maxLines="1"
             android:alpha="0.8" />
+
+        <TextView
+            android:id="@+id/folderPhotoCount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="0 photos"
+            android:textSize="10sp"
+            android:textColor="@color/brand_primary"
+            android:layout_marginTop="2dp"
+            android:textStyle="bold" />
     </LinearLayout>
 
     <!-- Toggle Switch -->

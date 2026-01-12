@@ -61,9 +61,12 @@ public class MainActivity extends AppCompatActivity {
     private SharedPreferences prefs;
     private DatabaseHelper dbHelper;
     private TextView tvTotalStats, tvSyncStatus, tvCurrentFile;
+    private TextView tvStatsTotal, tvStatsLastSync, tvStatsNextSync;
+    private Button btnSelectAll, btnDeselectAll;
     private ProgressBar pbSync;
     private static final int PERM_CODE = 101;
     private ActivityResultLauncher<String[]> permissionLauncher;
+    private Map<String, Integer> folderPhotoCounts = new java.util.HashMap<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,6 +90,16 @@ public class MainActivity extends AppCompatActivity {
         tvCurrentFile = findViewById(R.id.tvCurrentFile);
         pbSync = findViewById(R.id.pbSync);
         EditText etSearch = findViewById(R.id.etSearch);
+        
+        // Statistics card views
+        View statsCard = findViewById(R.id.statsCard);
+        tvStatsTotal = statsCard.findViewById(R.id.tvStatsTotal);
+        tvStatsLastSync = statsCard.findViewById(R.id.tvStatsLastSync);
+        tvStatsNextSync = statsCard.findViewById(R.id.tvStatsNextSync);
+        
+        // Bulk action buttons
+        btnSelectAll = findViewById(R.id.btnSelectAll);
+        btnDeselectAll = findViewById(R.id.btnDeselectAll);
 
         permissionLauncher = registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), result -> {
             boolean granted = true;
@@ -104,6 +117,10 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.btnSettings).setOnClickListener(v -> startActivity(new Intent(this, SettingsActivity.class)));
         findViewById(R.id.btnStartBackup).setOnClickListener(v -> scheduleBackup(true));
         findViewById(R.id.btnLogs).setOnClickListener(v -> startActivity(new Intent(this, LogActivity.class)));
+        findViewById(R.id.btnHistory).setOnClickListener(v -> startActivity(new Intent(this, HistoryActivity.class)));
+        
+        btnSelectAll.setOnClickListener(v -> selectAllFolders(true));
+        btnDeselectAll.setOnClickListener(v -> selectAllFolders(false));
 
         if (etSearch != null) {
             etSearch.addTextChangedListener(new TextWatcher() {
@@ -146,9 +163,69 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void refreshDashboard() {
-        tvTotalStats.setText(dbHelper.getTotalBackupCount() + " Items Saved");
+        int totalCount = dbHelper.getTotalBackupCount();
+        tvTotalStats.setText(totalCount + " Items Saved");
+        
+        // Update statistics card
+        tvStatsTotal.setText(String.valueOf(totalCount));
+        
         long last = prefs.getLong("last_sync_timestamp", 0);
-        tvSyncStatus.setText(last > 0 ? "Last Sync: " + new SimpleDateFormat("HH:mm", Locale.getDefault()).format(new Date(last)) : "Cloud Ready");
+        if (last > 0) {
+            tvSyncStatus.setText("Last Sync: " + new SimpleDateFormat("HH:mm", Locale.getDefault()).format(new Date(last)));
+            tvStatsLastSync.setText(getRelativeTime(last));
+        } else {
+            tvSyncStatus.setText("Cloud Ready");
+            tvStatsLastSync.setText("Never");
+        }
+        
+        // Calculate next sync time
+        int syncInterval = prefs.getInt("sync_interval", 60);
+        if (last > 0) {
+            long nextSync = last + (syncInterval * 60 * 1000);
+            tvStatsNextSync.setText(getRelativeTime(nextSync));
+        } else {
+            tvStatsNextSync.setText("--");
+        }
+    }
+    
+    private String getRelativeTime(long timestamp) {
+        long now = System.currentTimeMillis();
+        long diff = Math.abs(now - timestamp);
+        
+        if (diff < 60000) return "just now";
+        if (diff < 3600000) return (diff / 60000) + "m";
+        if (diff < 86400000) return (diff / 3600000) + "h";
+        if (diff < 604800000) return (diff / 86400000) + "d";
+        
+        SimpleDateFormat sdf = new SimpleDateFormat("MMM dd", Locale.US);
+        return sdf.format(new Date(timestamp));
+    }
+    
+    private void selectAllFolders(boolean select) {
+        for (File folder : filteredFolders) {
+            prefs.edit().putBoolean(folder.getAbsolutePath(), select).apply();
+        }
+        adapter.notifyDataSetChanged();
+        Toast.makeText(this, select ? "All folders selected" : "All folders deselected", Toast.LENGTH_SHORT).show();
+    }
+    
+    private void calculateFolderPhotoCounts() {
+        new Thread(() -> {
+            folderPhotoCounts.clear();
+            ContentResolver cr = getContentResolver();
+            for (File folder : allFolders) {
+                try (Cursor c = cr.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, 
+                    new String[]{"COUNT(*)"},
+                    MediaStore.Images.Media.DATA + " LIKE ?",
+                    new String[]{folder.getAbsolutePath() + "/%"},
+                    null)) {
+                    if (c != null && c.moveToFirst()) {
+                        folderPhotoCounts.put(folder.getAbsolutePath(), c.getInt(0));
+                    }
+                }
+            }
+            runOnUiThread(() -> adapter.notifyDataSetChanged());
+        }).start();
     }
 
     private void filterFolders(String query) {
@@ -187,7 +264,10 @@ public class MainActivity extends AppCompatActivity {
             dbHelper.saveFolders(fresh);
             runOnUiThread(() -> {
                 allFolders.clear(); allFolders.addAll(fresh);
-                filterFolders(""); swipeRefresh.setRefreshing(false); refreshDashboard();
+                filterFolders(""); 
+                calculateFolderPhotoCounts();
+                swipeRefresh.setRefreshing(false); 
+                refreshDashboard();
                 Toast.makeText(this, "Scan complete", Toast.LENGTH_SHORT).show();
             });
         }).start();
@@ -256,6 +336,16 @@ public class MainActivity extends AppCompatActivity {
                 File f = filteredFolders.get(i);
                 ((TextView)v.findViewById(R.id.folderName)).setText(f.getName());
                 ((TextView)v.findViewById(R.id.folderPath)).setText(f.getAbsolutePath());
+                
+                // Update photo count
+                TextView photoCount = v.findViewById(R.id.folderPhotoCount);
+                Integer count = folderPhotoCounts.get(f.getAbsolutePath());
+                if (count != null) {
+                    photoCount.setText(count + " photos");
+                } else {
+                    photoCount.setText("...");
+                }
+                
                 Switch s = v.findViewById(R.id.backupSwitch);
                 s.setOnCheckedChangeListener(null);
                 s.setChecked(prefs.getBoolean(f.getAbsolutePath(), false));
