@@ -211,22 +211,37 @@ public class MainActivity extends AppCompatActivity {
         Toast.makeText(this, select ? "All folders selected" : "All folders deselected", Toast.LENGTH_SHORT).show();
     }
     
+    
     private void calculateFolderPhotoCounts() {
         new Thread(() -> {
             folderPhotoCounts.clear();
             ContentResolver cr = getContentResolver();
             for (File folder : allFolders) {
-                try (Cursor c = cr.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, 
-                    new String[]{"COUNT(*)"},
-                    MediaStore.Images.Media.DATA + " LIKE ?",
-                    new String[]{folder.getAbsolutePath() + "/%"},
-                    null)) {
-                    if (c != null && c.moveToFirst()) {
-                        folderPhotoCounts.put(folder.getAbsolutePath(), c.getInt(0));
+                try {
+                    // Count photos in this folder by querying and counting cursor rows
+                    Cursor c = cr.query(
+                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI, 
+                        new String[]{MediaStore.Images.Media._ID},
+                        MediaStore.Images.Media.DATA + " LIKE ?",
+                        new String[]{folder.getAbsolutePath() + "/%"},
+                        null
+                    );
+                    
+                    if (c != null) {
+                        int count = c.getCount();
+                        folderPhotoCounts.put(folder.getAbsolutePath(), count);
+                        c.close();
                     }
+                } catch (Exception e) {
+                    // If counting fails, just skip this folder
+                    android.util.Log.e("MainActivity", "Error counting photos for " + folder.getName(), e);
                 }
             }
-            runOnUiThread(() -> adapter.notifyDataSetChanged());
+            runOnUiThread(() -> {
+                if (adapter != null) {
+                    adapter.notifyDataSetChanged();
+                }
+            });
         }).start();
     }
 
