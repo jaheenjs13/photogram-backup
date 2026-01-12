@@ -156,7 +156,6 @@ public class BackupWorker extends Worker {
                                 } else {
                                     dbHelper.addLog("ERROR", "Failed to upload: " + f.getName());
                                 }
-                            }
                         }
                     }
                     idx++;
