@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:background="@color/surface_bg">
 
-    <!-- Compact Modern Header -->
+    <!-- Modern Header with Gradient -->
     <LinearLayout
         android:id="@+id/header"
         android:layout_width="match_parent"
@@ -14,17 +14,20 @@
         android:orientation="vertical"
         android:paddingLeft="24dp"
         android:paddingRight="24dp"
-        android:paddingTop="20dp"
-        android:paddingBottom="32dp">
+        android:paddingTop="24dp"
+        android:paddingBottom="36dp"
+        android:elevation="4dp">
 
+        <!-- Stats Section -->
         <TextView
             android:id="@+id/tvTotalStats"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="0 Items Saved"
             android:textColor="@color/text_white"
-            android:textSize="20sp"
-            android:textStyle="bold" />
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.01" />
 
         <!-- Status Label -->
         <TextView
@@ -32,109 +35,132 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Cloud Sync Active"
-            android:textColor="#B0FFFFFF"
-            android:textSize="12sp"
-            android:layout_marginTop="4dp" />
+            android:textColor="#B3FFFFFF"
+            android:textSize="13sp"
+            android:layout_marginTop="4dp"
+            android:alpha="0.9" />
 
-        <!-- Real-time Progress Bar -->
+        <!-- Progress Bar -->
         <ProgressBar
             android:id="@+id/pbSync"
             style="?android:attr/progressBarStyleHorizontal"
             android:layout_width="match_parent"
-            android:layout_height="6dp"
-            android:layout_marginTop="12dp"
+            android:layout_height="4dp"
+            android:layout_marginTop="16dp"
             android:progressDrawable="@drawable/progress_bar_custom"
             android:visibility="gone"
             android:max="100" />
             
-        <!-- Real-time Filename -->
+        <!-- Current File Label -->
         <TextView
             android:id="@+id/tvCurrentFile"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Syncing..."
-            android:textColor="#CCFFFFFF"
-            android:textSize="10sp"
-            android:layout_marginTop="4dp"
+            android:textColor="#E6FFFFFF"
+            android:textSize="11sp"
+            android:layout_marginTop="6dp"
             android:visibility="gone"
             android:singleLine="true"
-            android:ellipsize="middle" />
+            android:ellipsize="middle"
+            android:alpha="0.85" />
 
+        <!-- Action Buttons -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="24dp"
             android:gravity="center_vertical">
 
             <Button
                 android:id="@+id/btnStartBackup"
                 android:layout_width="0dp"
-                android:layout_height="44dp"
-                android:layout_weight="1.2"
+                android:layout_height="48dp"
+                android:layout_weight="1"
                 android:text="Sync Now"
                 android:textAllCaps="false"
-                android:backgroundTint="@color/surface_card"
-                android:textColor="@color/brand_deep"
-                android:textStyle="bold" />
+                android:background="@drawable/button_white_bg"
+                android:textColor="@color/brand_primary"
+                android:textStyle="bold"
+                android:textSize="15sp"
+                android:letterSpacing="0.02" />
 
-            <View android:layout_width="10dp" android:layout_height="0dp"/>
+            <Space 
+                android:layout_width="12dp" 
+                android:layout_height="0dp"/>
 
             <ImageButton
                 android:id="@+id/btnLogs"
-                android:layout_width="44dp"
-                android:layout_height="44dp"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
                 android:src="@drawable/ic_history_modern"
                 android:background="@drawable/button_white_bg"
                 android:padding="12dp"
-                android:scaleType="fitCenter" />
+                android:scaleType="fitCenter"
+                android:contentDescription="View Logs" />
 
-            <View android:layout_width="10dp" android:layout_height="0dp"/>
+            <Space 
+                android:layout_width="12dp" 
+                android:layout_height="0dp"/>
 
             <ImageButton
                 android:id="@+id/btnSettings"
-                android:layout_width="44dp"
-                android:layout_height="44dp"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
                 android:src="@drawable/ic_settings_modern"
                 android:background="@drawable/button_white_bg"
                 android:padding="12dp"
-                android:scaleType="fitCenter" />
+                android:scaleType="fitCenter"
+                android:contentDescription="Settings" />
         </LinearLayout>
     </LinearLayout>
 
+    <!-- Floating Search Bar -->
     <EditText
         android:id="@+id/etSearch"
         android:layout_width="match_parent"
-        android:layout_height="50dp"
+        android:layout_height="52dp"
         android:layout_below="@id/header"
-        android:layout_marginTop="-25dp"
+        android:layout_marginTop="-26dp"
         android:layout_marginLeft="24dp"
         android:layout_marginRight="24dp"
         android:background="@drawable/search_bar_bg"
-        android:elevation="6dp"
+        android:elevation="8dp"
         android:hint="Search folders..."
+        android:textColorHint="@color/text_tertiary"
+        android:textColor="@color/text_primary"
         android:paddingLeft="18dp"
+        android:paddingRight="18dp"
         android:drawableLeft="@android:drawable/ic_menu_search"
-        android:drawablePadding="10dp"
+        android:drawableTint="@color/text_tertiary"
+        android:drawablePadding="12dp"
         android:singleLine="true"
-        android:textSize="14sp" />
+        android:textSize="14sp"
+        android:importantForAutofill="no"
+        android:inputType="text" />
 
+    <!-- Swipe to Refresh -->
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/swipeRefresh"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="195dp"> 
+        android:layout_below="@id/etSearch"
+        android:layout_marginTop="16dp">
 
+        <!-- Folder List -->
         <ListView
             android:id="@+id/folderListView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:divider="@null"
             android:dividerHeight="0dp"
-            android:paddingLeft="16dp"
-            android:paddingRight="16dp"
-            android:paddingTop="12dp" 
-            android:paddingBottom="20dp"
-            android:clipToPadding="false" />
+            android:paddingLeft="20dp"
+            android:paddingRight="20dp"
+            android:paddingTop="8dp" 
+            android:paddingBottom="24dp"
+            android:clipToPadding="false"
+            android:scrollbars="none"
+            android:overScrollMode="never" />
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 </RelativeLayout>

@@ -3,33 +3,56 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#121212">
+    android:background="@color/surface_bg">
 
-    <TextView
+    <!-- Header -->
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="System Logs"
-        android:padding="20dp"
-        android:textColor="#FFFFFF"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        android:background="#1A1A1A"/>
+        android:orientation="vertical"
+        android:background="@color/surface_card"
+        android:elevation="2dp"
+        android:padding="20dp">
+        
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Sync Logs"
+            android:textColor="@color/text_primary"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.01" />
+            
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="View detailed sync activity"
+            android:textColor="@color/text_secondary"
+            android:textSize="13sp"
+            android:layout_marginTop="2dp" />
+    </LinearLayout>
 
+    <!-- Log List -->
     <ListView
         android:id="@+id/logListView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:divider="#333333"
+        android:divider="@color/divider"
         android:dividerHeight="1dp"
-        android:padding="10dp" />
+        android:padding="16dp"
+        android:clipToPadding="false" />
 
+    <!-- Close Button -->
     <Button
         android:id="@+id/btnCloseLogs"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="52dp"
         android:text="Close"
-        android:layout_margin="10dp"
-        android:backgroundTint="#444444"
-        android:textColor="#FFFFFF"/>
+        android:layout_margin="16dp"
+        android:background="@drawable/button_secondary_bg"
+        android:textColor="@color/text_primary"
+        android:textStyle="bold"
+        android:textSize="15sp"
+        android:textAllCaps="false" />
 </LinearLayout>

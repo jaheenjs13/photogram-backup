@@ -1,14 +1,56 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Primary Brand Colors - Deep Blue Gradient -->
+    <color name="brand_primary">#0057FF</color>
+    <color name="brand_primary_dark">#0041CC</color>
+    <color name="brand_accent">#00A3FF</color>
+    <color name="brand_gradient_start">#0057FF</color>
+    <color name="brand_gradient_end">#00A3FF</color>
+    
+    <!-- Surface & Background -->
+    <color name="surface_bg">#F5F7FA</color>
+    <color name="surface_card">#FFFFFF</color>
+    <color name="surface_elevated">#FAFBFC</color>
+    <color name="surface_overlay">#F9FAFB</color>
+    
+    <!-- Text Colors -->
+    <color name="text_primary">#0F172A</color>
+    <color name="text_secondary">#475569</color>
+    <color name="text_tertiary">#94A3B8</color>
+    <color name="text_white">#FFFFFF</color>
+    <color name="text_on_brand">#FFFFFF</color>
+    
+    <!-- Status Colors -->
+    <color name="status_success">#10B981</color>
+    <color name="status_success_bg">#D1FAE5</color>
+    <color name="status_warning">#F59E0B</color>
+    <color name="status_warning_bg">#FEF3C7</color>
+    <color name="status_error">#EF4444</color>
+    <color name="status_error_bg">#FEE2E2</color>
+    <color name="status_info">#3B82F6</color>
+    <color name="status_info_bg">#DBEAFE</color>
+    
+    <!-- Border & Divider -->
+    <color name="border_light">#E2E8F0</color>
+    <color name="border_medium">#CBD5E1</color>
+    <color name="divider">#F1F5F9</color>
+    
+    <!-- Shadows & Overlays -->
+    <color name="shadow_light">#1A000000</color>
+    <color name="shadow_medium">#33000000</color>
+    <color name="overlay_dark">#80000000</color>
+    <color name="overlay_light">#40FFFFFF</color>
+    
+    <!-- Interactive States -->
+    <color name="interactive_hover">#F1F5F9</color>
+    <color name="interactive_pressed">#E2E8F0</color>
+    <color name="interactive_disabled">#F8FAFC</color>
+    
+    <!-- Legacy Support (for backward compatibility) -->
     <color name="brand_vibrant">#00A3FF</color>
     <color name="brand_deep">#0057FF</color>
     <color name="brand_dark">#101828</color>
-    
-    <color name="surface_bg">#F9FAFB</color>
-    <color name="surface_card">#FFFFFF</color>
-    <color name="card_border">#EAECF0</color>
-    
-    <color name="text_title">#101828</color>
-    <color name="text_body">#475467</color>
-    <color name="text_white">#FFFFFF</color>
+    <color name="card_border">#E2E8F0</color>
+    <color name="text_title">#0F172A</color>
+    <color name="text_body">#475569</color>
 </resources>
