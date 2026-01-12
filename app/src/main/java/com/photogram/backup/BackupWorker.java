@@ -29,10 +29,12 @@ import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
 
 public class BackupWorker extends Worker {
+    private static final Object SYNC_LOCK = new Object();
     private static final String CHANNEL_ID = "sync_channel";
     private static final int NOTIF_ID = 1;
     private static final String DB_URL = "https://photogram-dd154-default-rtdb.asia-southeast1.firebasedatabase.app/";
@@ -57,7 +59,8 @@ public class BackupWorker extends Worker {
     @NonNull
     @Override
     public Result doWork() {
-        String uid = FirebaseAuth.getInstance().getUid();
+        synchronized (SYNC_LOCK) {
+            String uid = FirebaseAuth.getInstance().getUid();
         if (uid == null) {
             dbHelper.addLog("ERROR", "Sync Failed: User not logged in");
             return Result.failure();
@@ -112,6 +115,7 @@ public class BackupWorker extends Worker {
             }
             return Result.failure();
         }
+        }
     }
 
     private boolean fetchCloudState(String uid) {
@@ -135,6 +139,7 @@ public class BackupWorker extends Worker {
 
     private int performDeltaSync(long since, TelegramHelper helper, Map<String, String> reg, String uid) throws Exception {
         int count = 0;
+        HashSet<String> processedThisScan = new HashSet<>();
         ContentResolver resolver = ctx.getContentResolver();
         dbHelper.addLog("DEBUG", "Scanning MediaStore since: " + since);
         int matchedFolders = 0;
@@ -147,6 +152,9 @@ public class BackupWorker extends Worker {
                     if (isLimited && currentUsage >= dailyLimit) break;
 
                     String path = cursor.getString(0);
+                    if (processedThisScan.contains(path)) continue;
+                    processedThisScan.add(path);
+                    
                     long mod = cursor.getLong(1);
                     File f = new File(path);
                     String folderPath = f.getParentFile() != null ? f.getParentFile().getAbsolutePath() : "";

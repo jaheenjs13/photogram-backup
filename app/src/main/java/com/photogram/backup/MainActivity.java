@@ -31,6 +31,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import androidx.work.Constraints;
 import androidx.work.Data;
 import androidx.work.ExistingPeriodicWorkPolicy;
+import androidx.work.ExistingWorkPolicy;
 import androidx.work.NetworkType;
 import androidx.work.OneTimeWorkRequest;
 import androidx.work.PeriodicWorkRequest;
@@ -226,7 +227,7 @@ public class MainActivity extends AppCompatActivity {
                 .setConstraints(con)
                 .setInputData(new Data.Builder().putBoolean("is_manual", true).build())
                 .build();
-            WorkManager.getInstance(this).enqueue(req);
+            WorkManager.getInstance(this).enqueueUniqueWork("PhotogramManualSync", ExistingWorkPolicy.KEEP, req);
         }
 
         PeriodicWorkRequest periodic = new PeriodicWorkRequest.Builder(BackupWorker.class, prefs.getInt("sync_interval", 60), TimeUnit.MINUTES)
