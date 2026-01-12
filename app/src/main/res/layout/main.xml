@@ -91,6 +91,20 @@
                 android:layout_height="0dp"/>
 
             <ImageButton
+                android:id="@+id/btnDashboard"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:src="@android:drawable/ic_menu_info_details"
+                android:background="@drawable/button_white_bg"
+                android:padding="12dp"
+                android:scaleType="fitCenter"
+                android:contentDescription="Dashboard" />
+
+            <Space 
+                android:layout_width="12dp" 
+                android:layout_height="0dp"/>
+
+            <ImageButton
                 android:id="@+id/btnLogs"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
