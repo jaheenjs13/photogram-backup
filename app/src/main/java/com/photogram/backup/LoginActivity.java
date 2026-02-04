@@ -21,7 +21,8 @@ public class LoginActivity extends AppCompatActivity {
     private FirebaseDatabase db;
     private EditText etEmail, etPassword;
     private TextView tvInfo;
-    private static final String DB_URL = "https://photogram-dd154-default-rtdb.asia-southeast1.firebasedatabase.app/";
+    private ValueEventListener approvalListener;
+    private DatabaseReference userRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,7 +30,7 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
 
         auth = FirebaseAuth.getInstance();
-        db = FirebaseDatabase.getInstance(DB_URL);
+        db = FirebaseDatabase.getInstance(AppConstants.FIREBASE_DB_URL);
         
         etEmail = findViewById(R.id.etEmail);
         etPassword = findViewById(R.id.etPassword);
@@ -53,6 +54,11 @@ public class LoginActivity extends AppCompatActivity {
             checkApprovalStatus();
         }
     }
+    
+    private void showStatus(String message) {
+        tvInfo.setText(message);
+        tvInfo.setVisibility(android.view.View.VISIBLE);
+    }
 
     private void registerUser() {
         final String email = etEmail.getText().toString().trim();
@@ -63,7 +69,7 @@ public class LoginActivity extends AppCompatActivity {
             return;
         }
 
-        tvInfo.setText("Creating secure account...");
+        showStatus("Creating secure account...");
         auth.createUserWithEmailAndPassword(email, pass).addOnSuccessListener(authResult -> {
             String uid = auth.getCurrentUser().getUid();
             HashMap<String, Object> userMap = new HashMap<>();
@@ -75,11 +81,11 @@ public class LoginActivity extends AppCompatActivity {
             userMap.put("last_sync_date", "never");
 
             db.getReference("users").child(uid).setValue(userMap).addOnSuccessListener(aVoid -> {
-                tvInfo.setText("Registered! Please ask Admin for approval.");
+                showStatus("Registered! Please ask Admin for approval.");
                 auth.signOut();
             });
         }).addOnFailureListener(e -> {
-            tvInfo.setText("Registration Failed: " + e.getMessage());
+            showStatus("Registration Failed: " + e.getMessage());
         });
     }
 
@@ -89,18 +95,20 @@ public class LoginActivity extends AppCompatActivity {
 
         if (email.isEmpty() || pass.isEmpty()) return;
 
-        tvInfo.setText("Authenticating...");
+        showStatus("Authenticating...");
         auth.signInWithEmailAndPassword(email, pass)
             .addOnSuccessListener(r -> checkApprovalStatus())
             .addOnFailureListener(e -> {
-                tvInfo.setText("Login Failed: " + e.getMessage());
+                showStatus("Login Failed: " + e.getMessage());
             });
     }
 
     private void checkApprovalStatus() {
         String uid = auth.getCurrentUser().getUid();
+        userRef = db.getReference("users").child(uid);
+        
         // Real-time listener: The app opens instantly when you change the status in Firebase
-        db.getReference("users").child(uid).addValueEventListener(new ValueEventListener() {
+        approvalListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot snapshot) {
                 if (!snapshot.exists()) return;
@@ -118,7 +126,20 @@ public class LoginActivity extends AppCompatActivity {
                     auth.signOut();
                 }
             }
-            @Override public void onCancelled(DatabaseError error) {}
-        });
+            @Override 
+            public void onCancelled(DatabaseError error) {
+                tvInfo.setText("Error: " + error.getMessage());
+            }
+        };
+        userRef.addValueEventListener(approvalListener);
+    }
+    
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // Clean up Firebase listener to prevent memory leaks
+        if (userRef != null && approvalListener != null) {
+            userRef.removeEventListener(approvalListener);
+        }
     }
 }

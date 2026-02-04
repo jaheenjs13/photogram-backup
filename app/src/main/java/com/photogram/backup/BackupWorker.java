@@ -36,14 +36,12 @@ public class BackupWorker extends Worker {
     private static final Object SYNC_LOCK = new Object();
     private static final String CHANNEL_ID = "sync_channel";
     private static final int NOTIF_ID = 1;
-    private static final String DB_URL = "https://photogram-dd154-default-rtdb.asia-southeast1.firebasedatabase.app/";
-    private static final String PREFS_NAME = "BackupPrefs";
     private static final String TAG = "BackupWorker";
     
-    // Configurable constants
-    private static final int MAX_RETRY_ATTEMPTS = 3;
-    private static final long UPLOAD_DELAY_MS = 1000;
-    private static final int FIREBASE_TIMEOUT_SECONDS = 10;
+    // Configurable constants from AppConstants
+    private static final int MAX_RETRY_ATTEMPTS = AppConstants.MAX_RETRY_ATTEMPTS;
+    private static final long UPLOAD_DELAY_MS = AppConstants.UPLOAD_DELAY_MS;
+    private static final int FIREBASE_TIMEOUT_SECONDS = AppConstants.FIREBASE_TIMEOUT_SECONDS;
 
     private final SharedPreferences prefs;
     private final DatabaseHelper dbHelper;
@@ -57,7 +55,7 @@ public class BackupWorker extends Worker {
     public BackupWorker(@NonNull Context context, @NonNull WorkerParameters params) {
         super(context, params);
         this.ctx = context;
-        this.prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        this.prefs = context.getSharedPreferences(AppConstants.PREFS_NAME, Context.MODE_PRIVATE);
         this.dbHelper = new DatabaseHelper(context);
         this.nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
     }
@@ -205,7 +203,7 @@ public class BackupWorker extends Worker {
     private boolean fetchCloudState(String uid) {
         try {
             DataSnapshot snap = Tasks.await(
-                FirebaseDatabase.getInstance(DB_URL)
+                FirebaseDatabase.getInstance(AppConstants.FIREBASE_DB_URL)
                     .getReference("users")
                     .child(uid)
                     .get(),
@@ -239,12 +237,12 @@ public class BackupWorker extends Worker {
                 // Reset usage if it's a new day
                 if (!today.equals(lastSyncDate)) {
                     currentUsage = 0;
-                    FirebaseDatabase.getInstance(DB_URL)
+                    FirebaseDatabase.getInstance(AppConstants.FIREBASE_DB_URL)
                         .getReference("users")
                         .child(uid)
                         .child("usage_count")
                         .setValue(0);
-                    FirebaseDatabase.getInstance(DB_URL)
+                    FirebaseDatabase.getInstance(AppConstants.FIREBASE_DB_URL)
                         .getReference("users")
                         .child(uid)
                         .child("last_sync_date")
@@ -364,7 +362,7 @@ public class BackupWorker extends Worker {
                                 // Update usage for limited accounts
                                 if (isLimited) {
                                     currentUsage++;
-                                    FirebaseDatabase.getInstance(DB_URL)
+                                    FirebaseDatabase.getInstance(AppConstants.FIREBASE_DB_URL)
                                         .getReference("users")
                                         .child(uid)
                                         .child("usage_count")

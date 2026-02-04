@@ -21,6 +21,8 @@ public class DashboardActivity extends Activity {
     private TextView tvDailyLimit, tvUsageCount, tvLastSync, tvNextSync;
     private TextView tvUserEmail, tvStorageInfo;
     private android.content.SharedPreferences prefs;
+    private DatabaseReference userRef;
+    private ValueEventListener firebaseListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -115,12 +117,12 @@ public class DashboardActivity extends Activity {
         String uid = FirebaseAuth.getInstance().getUid();
         if (uid == null) return;
 
-        DatabaseReference ref = FirebaseDatabase
-            .getInstance("https://photogram-dd154-default-rtdb.asia-southeast1.firebasedatabase.app/")
+        userRef = FirebaseDatabase
+            .getInstance(AppConstants.FIREBASE_DB_URL)
             .getReference("users")
             .child(uid);
 
-        ref.addValueEventListener(new ValueEventListener() {
+        firebaseListener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (!snapshot.exists()) return;
@@ -164,7 +166,8 @@ public class DashboardActivity extends Activity {
             public void onCancelled(@NonNull DatabaseError error) {
                 tvAccountStatus.setText("Error loading");
             }
-        });
+        };
+        userRef.addValueEventListener(firebaseListener);
     }
 
     private String formatFileSize(long bytes) {
@@ -177,6 +180,10 @@ public class DashboardActivity extends Activity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        // Remove Firebase listener to prevent memory leaks
+        if (userRef != null && firebaseListener != null) {
+            userRef.removeEventListener(firebaseListener);
+        }
         if (dbHelper != null) {
             dbHelper.close();
         }

@@ -180,9 +180,11 @@ public class MainActivity extends AppCompatActivity {
     }
     
     private void selectAllFolders(boolean select) {
+        SharedPreferences.Editor editor = prefs.edit();
         for (File folder : filteredFolders) {
-            prefs.edit().putBoolean(folder.getAbsolutePath(), select).apply();
+            editor.putBoolean(folder.getAbsolutePath(), select);
         }
+        editor.apply();
         adapter.notifyDataSetChanged();
         Toast.makeText(this, select ? "All folders selected" : "All folders deselected", Toast.LENGTH_SHORT).show();
     }

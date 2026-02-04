@@ -35,6 +35,11 @@ public class TelegramHelper {
         try (Response response = client.newCall(new Request.Builder().url(API_URL + "sendDocument").post(body).build()).execute()) {
             JSONObject res = new JSONObject(response.body().string());
             return res.getBoolean("ok") ? res.getJSONObject("result").getJSONObject("document").getString("file_id") : null;
+        } finally {
+            // Clean up temp file to prevent storage leaks
+            if (tempFile.exists()) {
+                tempFile.delete();
+            }
         }
     }
 
@@ -61,7 +66,10 @@ public class TelegramHelper {
                     while (keys.hasNext()) { String k = keys.next(); registry.put(k, map.getString(k)); }
                 }
             }
-        } catch (Exception e) {}
+        } catch (Exception e) {
+            // Log error but return empty registry to allow fresh start
+            android.util.Log.e("TelegramHelper", "Failed to load topic registry: " + e.getMessage(), e);
+        }
         return registry;
     }
 
