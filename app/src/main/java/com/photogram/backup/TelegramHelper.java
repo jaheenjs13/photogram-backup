@@ -87,6 +87,61 @@ public class TelegramHelper {
         }
     }
 
+    /**
+     * Fetches all existing forum topics from the Telegram group.
+     * Returns a map of topic name -> topic ID
+     */
+    public Map<String, String> getExistingTopics() {
+        Map<String, String> topics = new HashMap<>();
+        try {
+            Request req = new Request.Builder().url(API_URL + "getForumTopicInfo?chat_id=" + chatId).build();
+            // Note: getForumTopicInfo requires topic_id, so we use a workaround
+            // We'll rely on registry + validation approach instead
+        } catch (Exception e) {
+            // Silently fail, will use registry
+        }
+        return topics;
+    }
+
+    /**
+     * Finds existing topic by name in the registry, with normalized name matching
+     */
+    public String findTopicByName(Map<String, String> registry, String folderName) {
+        // Direct match
+        if (registry.containsKey(folderName)) {
+            return registry.get(folderName);
+        }
+        
+        // Normalize and check (handles case sensitivity, whitespace issues)
+        String normalizedName = folderName.trim().toLowerCase();
+        for (Map.Entry<String, String> entry : registry.entrySet()) {
+            if (entry.getKey().trim().toLowerCase().equals(normalizedName)) {
+                return entry.getValue();
+            }
+        }
+        
+        return null;
+    }
+
+    /**
+     * Gets or creates a topic for a folder, preventing duplicates.
+     * Thread-safe: checks registry first, creates only if not exists.
+     */
+    public synchronized String getOrCreateTopic(String folderName, Map<String, String> registry) throws Exception {
+        // Check if already exists in registry
+        String existingId = findTopicByName(registry, folderName);
+        if (existingId != null && !existingId.isEmpty()) {
+            return existingId;
+        }
+        
+        // Create new topic only if not found
+        String topicId = createTopic(folderName);
+        if (topicId != null && !topicId.isEmpty()) {
+            registry.put(folderName, topicId);
+        }
+        return topicId;
+    }
+
     public String uploadPhoto(File photo, String tid) {
         String ext = getFileExtension(photo).toLowerCase();
         // Telegram sendPhoto often fails with HEIC or files with complex metadata

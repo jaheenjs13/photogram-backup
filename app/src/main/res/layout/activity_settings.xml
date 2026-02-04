@@ -78,6 +78,72 @@
                 android:inputType="text" />
         </LinearLayout>
 
+        <!-- MTProto Settings Section -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="MTProto Settings (For Large Files)"
+            android:textColor="@color/brand_deep"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:textAllCaps="true"
+            android:letterSpacing="0.1"
+            android:layout_marginBottom="8dp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/search_bar_bg"
+            android:padding="16dp"
+            android:layout_marginBottom="20dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="ℹ️ Get credentials from my.telegram.org"
+                android:textColor="@color/text_body"
+                android:textSize="11sp"
+                android:layout_marginBottom="12dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="API ID"
+                android:textColor="@color/text_body"
+                android:textSize="12sp"
+                android:layout_marginBottom="4dp" />
+
+            <EditText
+                android:id="@+id/etApiId"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/edit_text_bg"
+                android:hint="Enter your API ID"
+                android:textColor="@color/text_title"
+                android:textSize="15sp"
+                android:inputType="number"
+                android:layout_marginBottom="16dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="API Hash"
+                android:textColor="@color/text_body"
+                android:textSize="12sp"
+                android:layout_marginBottom="4dp" />
+
+            <EditText
+                android:id="@+id/etApiHash"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/edit_text_bg"
+                android:hint="Enter your API Hash"
+                android:textColor="@color/text_title"
+                android:textSize="15sp"
+                android:inputType="textPassword" />
+        </LinearLayout>
+
         <!-- Preferences Section -->
         <TextView
             android:layout_width="wrap_content"

@@ -8,7 +8,7 @@ import android.widget.*;
 
 public class SettingsActivity extends Activity {
     SharedPreferences prefs;
-    EditText etBotToken, etChatId, etInterval;
+    EditText etBotToken, etChatId, etInterval, etApiId, etApiHash;
     RadioButton rbWifi, rbAny;
 
     @Override
@@ -20,6 +20,8 @@ public class SettingsActivity extends Activity {
         etBotToken = findViewById(R.id.etBotToken);
         etChatId = findViewById(R.id.etChatId);
         etInterval = findViewById(R.id.etInterval);
+        etApiId = findViewById(R.id.etApiId);
+        etApiHash = findViewById(R.id.etApiHash);
         rbWifi = findViewById(R.id.rbWifi);
         rbAny = findViewById(R.id.rbAny);
         Button btnSave = findViewById(R.id.btnSave);
@@ -28,6 +30,8 @@ public class SettingsActivity extends Activity {
         etBotToken.setText(prefs.getString("custom_bot_token", ""));
         etChatId.setText(prefs.getString("chat_id", ""));
         etInterval.setText(String.valueOf(prefs.getInt("sync_interval", 60)));
+        etApiId.setText(prefs.getString("api_id", ""));
+        etApiHash.setText(prefs.getString("api_hash", ""));
         
         if (prefs.getBoolean("only_wifi", false)) rbWifi.setChecked(true);
         else rbAny.setChecked(true);
@@ -37,6 +41,8 @@ public class SettingsActivity extends Activity {
                 .putString("custom_bot_token", etBotToken.getText().toString().trim())
                 .putString("chat_id", etChatId.getText().toString().trim())
                 .putInt("sync_interval", Integer.parseInt(etInterval.getText().toString()))
+                .putString("api_id", etApiId.getText().toString().trim())
+                .putString("api_hash", etApiHash.getText().toString().trim())
                 .putBoolean("only_wifi", rbWifi.isChecked())
                 .apply();
             

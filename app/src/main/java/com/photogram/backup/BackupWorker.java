@@ -266,6 +266,7 @@ public class BackupWorker extends Worker {
         int count = 0;
         HashSet<String> processedThisScan = new HashSet<>();
         ContentResolver resolver = ctx.getContentResolver();
+        int initialRegistrySize = reg.size(); // Track for batch save optimization
         
         dbHelper.addLog("DEBUG", "Scanning MediaStore since: " + since + " (" + new Date(since * 1000) + ")");
         
@@ -389,27 +390,34 @@ public class BackupWorker extends Worker {
             dbHelper.addLog("DEBUG", "Scan result: " + matchedFolders + " photos in selected folders, " + count + " new uploaded.");
         }
         
+        // Batch save registry if new topics were created during sync
+        if (reg.size() > initialRegistrySize) {
+            dbHelper.addLog("INFO", "Saving registry with " + (reg.size() - initialRegistrySize) + " new topic(s)");
+            helper.saveTopicRegistry(reg);
+        }
+        
         return count;
     }
 
     private String getTid(File directory, TelegramHelper helper, Map<String, String> registry) throws Exception {
         String folderName = directory.getName();
         
-        // Return existing topic ID if available
-        if (registry.containsKey(folderName)) {
-            return registry.get(folderName);
-        }
+        // Check registry size before checking for topic
+        int sizeBefore = registry.size();
         
-        // Create new topic
-        dbHelper.addLog("DEBUG", "Creating new topic for folder: " + folderName);
-        String topicId = helper.createTopic(folderName);
+        // Use synchronized getOrCreateTopic to prevent duplicates
+        // This method checks registry with normalized name matching before creating
+        String topicId = helper.getOrCreateTopic(folderName, registry);
         
         if (topicId != null && !topicId.isEmpty()) {
-            registry.put(folderName, topicId);
-            helper.saveTopicRegistry(registry);
+            // Log only if a new topic was created (registry size increased)
+            if (registry.size() > sizeBefore) {
+                dbHelper.addLog("INFO", "Created new topic for folder: " + folderName + " -> " + topicId);
+            }
             return topicId;
         }
         
+        dbHelper.addLog("ERROR", "Failed to get/create topic for folder: " + folderName);
         return null;
     }
 
